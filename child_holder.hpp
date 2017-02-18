@@ -2,6 +2,9 @@
  * TChildHolder is declared here
  */
 
+#include <list>
+#include <memory>
+#include <unordered_map>
 
 namespace NWbMqtt {
     
@@ -29,12 +32,13 @@ class TChildHolderBase {
      * 
      * May be rewritten later to faster container.
      */
-    std::unordered_map<string, TChild*> aliasesOfChildren;
+    std::unordered_map<std::string, TChild*> aliasesOfChildren;
   protected:
     
     
     /*! 
-     *  This method is working like a constructor of TChild by default.
+     *  This method is supposed to work like a constructor of TChild.
+     * 
      *  It used by GetChildReference
      *  
      *  It's introduced because it may be overrided and even be a center of creation of children
@@ -76,15 +80,14 @@ class TChildHolderBase {
   
     /*!
      * This method does something like this: <br>
-     *      1) Call PrepareChildToDelete <br>
+     *      1) Delete child <br>
      *      2) Remove child from children list and remove all it's aliases <br>
-     *      3) Delete child <br>
      * \param [in] control - control to remove
      */ 
-    void RemoveChild(TChild *control);
+    void RemoveChild(TChild *child);
     
     /*!
-     * Same as RemoveChild(TChild *control), but
+     * Same as RemoveChild(TChild *child), but
      * \param [in] aliaseOfChild - aliase of child that you want to delete
      */
     void RemoveChild(const std::string &aliaseOfChild);
@@ -117,7 +120,7 @@ class TChildHolderBase {
     /*!
      *  Add aliase of control to aliases map
      */
-    void AddAliase(Control *control, const std::string &newAliase);
+    void AddAliase(TChild *control, const std::string &newAliase);
     
     /*!
      *  Constructor

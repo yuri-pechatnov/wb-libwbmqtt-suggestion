@@ -3,6 +3,11 @@
  */
 
 
+#pragma once
+
+#include <type_traits>
+
+
 namespace NWbMqtt {
 
 
@@ -66,8 +71,6 @@ struct get_root_type<TArgNoChildOrParent, TArgNoChildOrParent> {
 
 
 
-
-
 /*!
  * This function extends functionality of TParentHolder.
  * It allows to get a root of hierarchy in almost no time.
@@ -85,10 +88,7 @@ inline TRoot* GetRootOfParentHolder(
             !std::is_base_of<TNotParentHolder, T>::value &&
             !std::is_same<T, typename T::TParent>::value
         >::type *dummy = 0
-)
-{
-    return GetRootOfParentHolder(member->Parent);
-}
+);
 
 /*!
  * Kind of specification of function of the same name. <br>
@@ -99,12 +99,7 @@ template <typename T>
 inline T* GetRootOfParentHolder(
         T *it,
         typename std::enable_if<std::is_same<T, typename T::TParent>::value>::type *dummy = 0
-)
-{
-    while (it->Parent != nullptr && it->Parent != it)
-        it = it->Parent;
-    return it;
-}
+);
 
 /*!
  * Kind of specification of function of the same name.
@@ -114,9 +109,6 @@ template <typename T>
 inline T* GetRootOfParentHolder(
         T *member,
         typename std::enable_if<std::is_base_of<TNotParentHolder, T>::value>::type *dummy = 0
-)
-{
-    return member;
-}
+);
     
 };
