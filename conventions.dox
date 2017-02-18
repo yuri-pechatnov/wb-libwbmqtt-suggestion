@@ -1,0 +1,107 @@
+/*!
+
+\mainpage Mqtt library for WB drivers with hierarchic structure
+
+\author Yuri Pechatnov
+
+\version no_version_yet
+
+
+## Цели:
+- Быстрое создание устройств, удобное обновление как при взаимодействии с иерархией изнутри, так и снаружи
+- Отсутсвие динамического приведения типов
+- Перекрестные ссылки потомок-родитель с реальными типами
+- Именованные аргументы там, где это улучшит читаемость кода
+- Возможность получения и обработки сигналов в модели драйвер-устройство-контрол, абстрагируясь от mqtt
+- Возможность обработки сигналов на любом уровне выше драйвера, драйвер, устройство, контрол
+
+
+## Что значит иерархия?
+- Введение иерархии сущностей <br>
+  Driver -\> (Device group -\> ...) -\> Device -\> (Device group -\> ...) -\> Control
+  (Driver - верхний элемент иерархии, Control - самый нижний)
+- В реальности это дерево, каждый слой которого - представители сущности
+- Общение между сущностями происходит иерархически, за раз на один уровень вверх-вниз, путем передачи сообщений
+- Сообщение - (тип сообщения, топик, значение) - задает все возможные (и нужные) операции в mqtt. <br>
+  Это publish, delete, subsrcibe, ... в направлении "вверх" (от контролов к драйверу и далее в mqtt). <br>
+  И set value, on subscribe, ... в направлениии "вниз" (из mqtt драйверу и дальше вниз по иерархии)
+
+## Возможности использования
+- Использование как интефейс только для чтения
+- Использование только для записи (и чтения)
+- Интегрирование логики в классы иерархии
+
+
+## Как пользоваться?
+Примеры использования: <br>
+simple_model.h <br>
+with_device_group_model.h <br>
+gpio_model.h <br>
+raw_model.h <br>
+
+
+### Необходимые функции вне иерархии
+void TMQTTWrapper::DeleteBranch(String topic);
+
+--------------------------------------------
+### Отложенные предложения
+
+
+
+В системе новый демон:
+Отслеживание драйверов и устройств
+wb-mqtt-heartbeat-daemon
+
+
+Дополнения к mqtt conventions:
+
+Отслеживание по регулярному сигналу
+в топики, которые необходимо отслеживать добавить
+/meta/heartbeat=1
+/meta/heartbeat/interval=\<sec\>
+/meta/heartbeat/action=show_error | remove | restart_driver | stop_driver
+Если упал драйвер
+/meta/action_if_driver_is_fallen=remove_topic | show_error | ignore
+
+общение с демоном через (демон отслеживает этот топик)
+
+/drivers - топик в корне mqtt
+
+Когда драйвер запускается, он заполняет информацию о себе
+/drivers/driver_name=1
+/drivers/driver_name/meta/heartbeat... - опционально
+
+Для управления драйвером в сложных случаях
+/drivers/driver_name/check_status_command
+/drivers/driver_name/start_command
+/drivers/driver_name/stop_command
+
+Отслеживание состояния драйвера: hearbeat или check_status_command
+
+Сюда пишутся названия устройств, которые контролирует драйвер
+/drivers/driver_name/devices="device1;device2;device3..."
+Альтернативы
+1) /drivers/driver_name/add_device - тогда демону нужно все помнить и критично никогда не падать
+2) /drivers/driver_name/device1 - излишнее копирование данных / разрастание дерева
+   /drivers/driver_name/device2
+   
+   
+   
+/* Если нужен, добавляется в потомки Driver и Device
+ */
+class HeartbeatSender {
+    void enable(interval);
+    void doHearbeat();
+    void disable();
+    HeartbeatSender(topic, interval) 
+}
+
+   
+/verdict Оставить, не делать, если понадобится вспомнить
+
+
+
+
+28H
+
+*/
